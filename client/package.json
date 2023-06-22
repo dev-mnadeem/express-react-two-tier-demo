@@ -1,8 +1,8 @@
 {
-  "name": "fitco-users-client",
+  "name": "roster-client",
   "version": "0.1.0",
   "private": true,
-  "description": "React client for the Fitco user-management take-home.",
+  "description": "React console for Roster: list, add, edit and remove users.",
   "type": "module",
   "engines": {
     "node": ">=22.22"

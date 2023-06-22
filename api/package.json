@@ -1,7 +1,7 @@
 {
-  "name": "fitco-users-api",
+  "name": "roster-api",
   "version": "1.0.0",
-  "description": "Express + Sequelize REST API for the Fitco user-management take-home.",
+  "description": "Express + Sequelize REST API behind Roster, a small user-management console.",
   "license": "MIT",
   "private": true,
   "type": "module",

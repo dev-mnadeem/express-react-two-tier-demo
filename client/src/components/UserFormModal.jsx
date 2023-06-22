@@ -109,7 +109,7 @@ export const UserFormModal = ({ show, selectedUser, onClose, onSave }) => {
                   name="email"
                   value={draft.email}
                   onChange={handleChange}
-                  placeholder="amelia.hartley@fitco.example"
+                  placeholder="amelia.hartley@roster.example"
                   autoComplete="email"
                   required
                 />

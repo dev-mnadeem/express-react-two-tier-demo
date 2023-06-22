@@ -12,7 +12,7 @@ const makeUsers = (count, offset = 0) =>
     id: offset + i + 1,
     firstName: `First${offset + i + 1}`,
     lastName: `Last${offset + i + 1}`,
-    email: `user${offset + i + 1}@fitco.example`,
+    email: `user${offset + i + 1}@roster.example`,
   }));
 
 const pageReply = (
@@ -44,7 +44,7 @@ describe("user list", () => {
     render(<App />);
 
     expect(await screen.findByText("First1 Last1")).toBeInTheDocument();
-    expect(screen.getByText("user3@fitco.example")).toBeInTheDocument();
+    expect(screen.getByText("user3@roster.example")).toBeInTheDocument();
     expect(screen.getByText(/3 registered users/i)).toBeInTheDocument();
   });
 
@@ -140,7 +140,7 @@ describe("creating a user", () => {
     );
     await userEvent.type(
       within(dialog).getByLabelText(/email/i),
-      "amelia@fitco.example"
+      "amelia@roster.example"
     );
     await userEvent.type(
       within(dialog).getByLabelText(/password/i),
@@ -154,7 +154,7 @@ describe("creating a user", () => {
     expect(posted[0]).toMatchObject({
       firstName: "Amelia",
       lastName: "Hartley",
-      email: "amelia@fitco.example",
+      email: "amelia@roster.example",
       password: "Passw0rd!1",
     });
     expect(await screen.findByText("First1 Last1")).toBeInTheDocument();
@@ -284,7 +284,7 @@ describe("editing a user", () => {
     );
     await userEvent.type(
       within(createDialog).getByLabelText(/email/i),
-      "new@fitco.example"
+      "new@roster.example"
     );
     await userEvent.type(
       within(createDialog).getByLabelText(/password/i),

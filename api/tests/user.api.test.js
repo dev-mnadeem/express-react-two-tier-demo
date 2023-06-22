@@ -19,7 +19,7 @@ const app = createApp();
 const validPayload = {
   firstName: "Amelia",
   lastName: "Hartley",
-  email: "amelia.hartley@fitco.example",
+  email: "amelia.hartley@roster.example",
   password: "Passw0rd!123",
 };
 
@@ -73,10 +73,10 @@ describe("POST /api/users", () => {
   it("normalises the email to lower case", async () => {
     const res = await request(app)
       .post("/api/users")
-      .send({ ...validPayload, email: "Amelia.Hartley@Fitco.Example" })
+      .send({ ...validPayload, email: "Amelia.Hartley@Roster.Example" })
       .expect(201);
 
-    assert.equal(res.body.data.email, "amelia.hartley@fitco.example");
+    assert.equal(res.body.data.email, "amelia.hartley@roster.example");
   });
 
   it("rejects a missing password with 400 rather than a 500", async () => {

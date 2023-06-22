@@ -49,9 +49,9 @@ function App() {
         <Container className="d-flex align-items-center justify-content-between py-3">
           <div className="d-flex align-items-center gap-2">
             <span className="brand-mark" aria-hidden="true">
-              F
+              R
             </span>
-            <span className="fw-semibold">Fitco Admin</span>
+            <span className="fw-semibold">Roster</span>
           </div>
 
           <span className="small text-muted">User management</span>

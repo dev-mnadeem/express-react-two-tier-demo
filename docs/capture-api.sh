@@ -18,9 +18,9 @@ show GET "$B/health"
 echo "### 2. A bounded, paginated list (limit is capped server-side)"
 show GET "$B/users?page=1&limit=3"
 echo "### 3. Create a user -- 201 with a Location header, no password in the body"
-show POST "$B/users" '{"firstName":"Nina","lastName":"Petrov","email":"Nina.Petrov@Fitco.Example","password":"Passw0rd!123"}'
+show POST "$B/users" '{"firstName":"Nina","lastName":"Petrov","email":"Nina.Petrov@Roster.Example","password":"Passw0rd!123"}'
 echo "### 4. The same email again -- 409, not a 500 stack trace"
-show POST "$B/users" '{"firstName":"Nina","lastName":"Petrov","email":"nina.petrov@fitco.example","password":"Passw0rd!123"}'
+show POST "$B/users" '{"firstName":"Nina","lastName":"Petrov","email":"nina.petrov@roster.example","password":"Passw0rd!123"}'
 echo "### 5. Validation failure -- 400 with per-field detail"
 show POST "$B/users" '{"firstName":"","lastName":"Petrov","email":"not-an-email","password":"short"}'
 echo "### 6. Update a user that does not exist -- 404"

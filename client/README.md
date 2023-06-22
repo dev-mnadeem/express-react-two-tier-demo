@@ -1,4 +1,4 @@
-# Fitco users client
+# Roster client
 
 React 18 single-page client, built with Vite, for the user-management API in [`../api`](../api).
 

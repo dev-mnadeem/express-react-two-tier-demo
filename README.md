@@ -1,4 +1,4 @@
-# Fitco user management
+# Roster: a user-management API and console
 
 A two-package CRUD application built as a technical assessment: an Express +
 Sequelize REST API over PostgreSQL, and a React single-page client that lists,

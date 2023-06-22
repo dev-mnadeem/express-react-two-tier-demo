@@ -12,7 +12,7 @@ import {
 const base = {
   firstName: "Amelia",
   lastName: "Hartley",
-  email: "amelia@fitco.example",
+  email: "amelia@roster.example",
   password: "Passw0rd!123",
 };
 
@@ -21,11 +21,11 @@ describe("createUserSchema", () => {
     const parsed = createUserSchema.parse({
       ...base,
       firstName: "  Amelia  ",
-      email: "  Amelia@Fitco.Example ",
+      email: "  Amelia@Roster.Example ",
     });
 
     assert.equal(parsed.firstName, "Amelia");
-    assert.equal(parsed.email, "amelia@fitco.example");
+    assert.equal(parsed.email, "amelia@roster.example");
   });
 
   it("names the missing field in the error", () => {

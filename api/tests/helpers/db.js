@@ -26,7 +26,7 @@ export const makeUser = async (overrides = {}) => {
   return User.create({
     firstName: "Test",
     lastName: "User",
-    email: `test.${suffix}@fitco.example`,
+    email: `test.${suffix}@roster.example`,
     password: await passwordHasher.hash("Passw0rd!"),
     ...overrides,
   });
