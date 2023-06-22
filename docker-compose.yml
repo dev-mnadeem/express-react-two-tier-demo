@@ -40,8 +40,8 @@ services:
     build:
       context: ./client
       args:
-        # Baked in at build time: CRA inlines REACT_APP_* into the bundle.
-        REACT_APP_API_URL: ${PUBLIC_API_URL:-http://localhost:8700}
+        # Baked in at build time: Vite inlines VITE_* into the bundle.
+        VITE_API_URL: ${PUBLIC_API_URL:-http://localhost:8700}
     ports:
       - "8701:8080"
     depends_on:

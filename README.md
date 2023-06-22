@@ -21,8 +21,8 @@ npm start                    # http://localhost:8700
 
 cd ../client                 # second terminal
 npm install
-cp .env.sample .env          # REACT_APP_API_URL=http://localhost:8700
-npm start                    # http://localhost:8701
+cp .env.sample .env          # VITE_API_URL=http://localhost:8700
+npm run dev                  # http://localhost:8701
 ```
 
 ```bash
@@ -144,14 +144,14 @@ database normalised.
 | `LOG_LEVEL` | no | `info` (`silent` under `NODE_ENV=test`) | `silent`, `error`, `warn`, `info` or `debug`. `debug` also logs SQL. |
 | `SEED_ON_BOOT` | no | `false` | Insert 34 demo users after the schema syncs. Development only. |
 
-`client/.env`: `REACT_APP_API_URL` (default: a same-origin `/api`, useful behind
-a reverse proxy) and `PORT` (CRA's dev server, default `3000`).
+`client/.env`: `VITE_API_URL` (default: a same-origin `/api`, useful behind
+a reverse proxy). The Vite dev server listens on `8701`.
 
 ## Tests
 
 ```bash
 cd api    && npm test     # node:test + supertest against in-process pg-mem
-cd client && npm test     # Jest + RTL, axios mocked at the adapter
+cd client && npm test     # Vitest + RTL, axios mocked at the adapter
 ```
 
 Neither suite needs a database, a network or Docker. Last run:
@@ -231,9 +231,9 @@ and one env var, touching no service, controller or test. It is a real seam, not
 a decorative one: a test registers a fake hasher at runtime and asserts it is
 used, and the registry throws on an unknown name rather than falling back.
 
-**`node:test` for the API, Jest for the client.** The API is native ESM, and
-Jest's ESM path still wants experimental VM flags plus Babel; Node's built-in
-runner wants neither. The client stays on Jest because CRA owns that config.
+**`node:test` for the API, Vitest for the client.** The API is native ESM, and
+Node's built-in runner needs no transform step for it. The client is built by
+Vite, so Vitest reuses that same config and JSX transform for its tests.
 
 ## Known gaps
 

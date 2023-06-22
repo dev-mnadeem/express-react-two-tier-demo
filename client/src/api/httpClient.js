@@ -1,12 +1,12 @@
 import axios from "axios";
 
 /**
- * Resolving the base URL in one place means a missing REACT_APP_API_URL fails
+ * Resolving the base URL in one place means a missing VITE_API_URL fails
  * with a readable message instead of firing every request at the literal
  * string "undefined/api", which is what the original client did.
  */
-export const resolveBaseUrl = (env = process.env) => {
-  const raw = env.REACT_APP_API_URL;
+export const resolveBaseUrl = (env = import.meta.env) => {
+  const raw = env.VITE_API_URL;
 
   if (!raw || !raw.trim()) {
     return "/api";

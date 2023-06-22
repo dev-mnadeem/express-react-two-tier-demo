@@ -6,11 +6,12 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
-# Create React App inlines REACT_APP_* at build time, not at run time, so the
-# API origin has to be supplied here rather than as a container env var.
-ARG REACT_APP_API_URL=/
-ENV REACT_APP_API_URL=$REACT_APP_API_URL
+# Vite inlines VITE_* at build time, not at run time, so the API origin has to
+# be supplied here rather than as a container env var. Empty means same-origin.
+ARG VITE_API_URL=
+ENV VITE_API_URL=$VITE_API_URL
 
+COPY index.html vite.config.js ./
 COPY public ./public
 COPY src ./src
 RUN npm run build
@@ -18,7 +19,7 @@ RUN npm run build
 # ---- runtime ---------------------------------------------------------------
 FROM nginx:1.27-alpine AS runtime
 
-COPY --from=build /app/build /usr/share/nginx/html
+COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Give the unprivileged nginx user ownership of the paths it writes to and bind
