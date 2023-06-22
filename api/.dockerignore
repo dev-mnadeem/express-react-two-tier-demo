@@ -5,8 +5,7 @@ tests
 .env
 .env.*
 !.env.sample
-.eslintrc.json
-.eslintignore
+eslint.config.js
 .prettierrc.json
 .prettierignore
 Dockerfile

@@ -1,6 +1,6 @@
 import dotenv from "dotenv";
 
-dotenv.config();
+dotenv.config({ quiet: true });
 
 const toInt = (value, fallback) => {
   const parsed = Number.parseInt(value ?? "", 10);
