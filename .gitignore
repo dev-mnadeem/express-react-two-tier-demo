@@ -1,0 +1,39 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Local Python virtualenv left over from tooling; not part of this Node project
+project_venv/
+
+# Environment: never commit real values; the .example/.sample files document the keys
+.env
+.env.*
+!.env.example
+!.env.sample
+
+# Build output
+build/
+dist/
+
+# Test output and caches
+coverage/
+.eslintcache
+.cache/
+tmp/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Not part of this repository
+.github/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
