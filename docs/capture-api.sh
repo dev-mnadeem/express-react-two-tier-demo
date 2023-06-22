@@ -1,16 +1,22 @@
+#!/bin/sh
+# Replays one request per endpoint against a running API and prints each
+# exchange. Usage: sh docs/capture-api.sh > docs/api-transcript-body.txt
+# API_BASE defaults to http://localhost:8700.
 set -u
-B=http://localhost:8700/api
+B="${API_BASE:-http://localhost:8700}/api"
+BODY=$(mktemp)
+trap 'rm -f "$BODY"' EXIT
 show() {
   echo "\$ curl -i -s -X $1 '$2'${3:+ \\
      -H 'Content-Type: application/json' \\
      -d '$3'}"
   if [ -n "${3:-}" ]; then
-    curl -s -D - -o /tmp/body.json -X "$1" "$2" -H 'Content-Type: application/json' -d "$3" \
+    curl -s -D - -o "$BODY" -X "$1" "$2" -H 'Content-Type: application/json' -d "$3" \
       | sed -n '1p;/^[Cc]ontent-[Tt]ype:/p;/^[Ll]ocation:/p'
   else
-    curl -s -D - -o /tmp/body.json -X "$1" "$2" | sed -n '1p;/^[Cc]ontent-[Tt]ype:/p;/^[Ll]ocation:/p'
+    curl -s -D - -o "$BODY" -X "$1" "$2" | sed -n '1p;/^[Cc]ontent-[Tt]ype:/p;/^[Ll]ocation:/p'
   fi
-  if [ -s /tmp/body.json ]; then python3 -m json.tool /tmp/body.json 2>/dev/null || cat /tmp/body.json; fi
+  if [ -s "$BODY" ]; then python3 -m json.tool "$BODY" 2>/dev/null || cat "$BODY"; fi
   echo
 }
 echo "### 1. Health check"

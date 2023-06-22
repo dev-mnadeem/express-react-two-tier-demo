@@ -1,6 +1,6 @@
 # Reproducing the original defects
 
-Every entry in the README's ["What was fixed"](../README.md#what-was-fixed)
+Every entry in the README's ["Defects found in the original submission"](../README.md#defects-found-in-the-original-submission)
 table was reproduced before being changed. This file is the literal evidence
 for the server-side ones.
 

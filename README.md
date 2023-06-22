@@ -1,29 +1,28 @@
 # Roster: a user-management API and console
 
-A two-package CRUD application built as a technical assessment: an Express +
-Sequelize REST API over PostgreSQL, and a React single-page client that lists,
-creates, edits and deletes users. The scope is deliberately one `User` resource
-— no auth, no second entity, nothing beyond managing that one table.
+Roster is a small, complete CRUD service for one resource: users. An Express 5
++ Sequelize REST API over PostgreSQL does the work, and a React console built
+with Vite lists, pages, creates, edits and deletes users through it.
 
-What makes it worth reading is not the feature list, which is short by design.
-It is the layering, the validation boundary, the single error-to-response seam,
-and the 63 tests that run without a database, a container or a network.
+The feature list is short on purpose. What the project is about is the shape
+around it: a strict validation boundary, a single place where errors become
+responses, passwords that never leave the server in any form, server-side
+pagination with a ceiling, and 68 tests (43 API, 25 client) that need no
+database, container or network.
 
-## Run it
+![The user list](docs/screenshots/01-users-list.png)
 
-Node 20.11+ and a PostgreSQL instance.
+## Run it with Docker Compose
+
+Docker with Compose v2 is all you need.
 
 ```bash
-cd api
-npm install
-cp .env.example .env          # set DB_URL; SEED_ON_BOOT=true gives you 34 demo rows
-npm start                    # http://localhost:8700
-
-cd ../client                 # second terminal
-npm install
-cp .env.example .env          # VITE_API_URL=http://localhost:8700
-npm run dev                  # http://localhost:8701
+cp .env.example .env              # optional; set SEED_ON_BOOT=true for 34 demo users
+docker compose up --build
 ```
+
+- Console: http://localhost:8701
+- API: http://localhost:8700/api
 
 ```bash
 curl http://localhost:8700/api/health
@@ -32,29 +31,80 @@ curl http://localhost:8700/api/health
 
 `/api/health` runs a real `sequelize.authenticate()` and answers `503` with
 `{"status":"degraded","database":"down"}` when the database is unreachable.
+`docker compose down -v` stops everything and drops the database volume.
 
-A compose file and both Dockerfiles are checked in and `docker compose config`
-parses cleanly, but **the images have never been built or booted** — the Docker
-daemon was unavailable on the machine this was prepared on. Treat
-`docker compose up --build` as untested; the npm path above was run.
+The API image runs as the unprivileged `node` user, the console is served by
+nginx as the `nginx` user on port 8080, and both have health checks. The API
+origin is baked into the client bundle at build time from `PUBLIC_API_URL`.
 
-## What the screens look like
+## Run it without Docker
 
-Captured with Playwright against the running stack — the API on port 8700 backed
-by a PostgreSQL database seeded with 34 users, the client on port 8701. All four
-files are 2880×1800, i.e. 1440×900 at 2× device scale.
+Node 22.22 or newer (see `.nvmrc`) and a PostgreSQL instance.
 
-| The list, paginated server-side | Page 3 of 4, rows 21–30 |
-| --- | --- |
-| ![Users list](docs/screenshots/01-users-list.png) | ![Pagination](docs/screenshots/02-pagination.png) |
+```bash
+cd api
+npm install
+cp .env.example .env         # set DB_URL; SEED_ON_BOOT=true gives you 34 demo rows
+npm start                    # http://localhost:8700
 
-| The edit modal, prefilled, no password field | A genuine 409 surfaced in the form |
-| --- | --- |
-| ![Edit user](docs/screenshots/03-edit-user.png) | ![Duplicate email](docs/screenshots/04-duplicate-email-error.png) |
+cd ../client                 # second terminal
+npm install
+cp .env.example .env         # VITE_API_URL=http://localhost:8700
+npm run dev                  # http://localhost:8701
+```
 
-Literal request/response pairs for every endpoint, captured from that same
-instance, are in [`docs/api-transcript.md`](docs/api-transcript.md); the script
+## The API
+
+| Method | Path | Success | Errors |
+| --- | --- | --- | --- |
+| `GET` | `/api/health` | `200` | `503` when the database is down |
+| `GET` | `/api/users?page=&limit=` | `200`, a page plus `{ page, limit, total, totalPages }` | `400` for a bad page or a limit above `PAGE_MAX_LIMIT` |
+| `POST` | `/api/users` | `201` with a `Location` header | `400` per-field, `409` duplicate email |
+| `GET` | `/api/users/:id` | `200` | `400` bad id, `404` |
+| `PUT` | `/api/users/:id` | `200` with the updated user | `400`, `404`, `409` |
+| `DELETE` | `/api/users/:id` | `204` | `404` |
+
+Every failure has the same body: `{ "success": false, "error": { "code",
+"message", "details"? } }`. A duplicate address, for example:
+
+```text
+$ curl -i -s -X POST 'http://localhost:8700/api/users' \
+     -H 'Content-Type: application/json' \
+     -d '{"firstName":"Nina","lastName":"Petrov","email":"nina.petrov@roster.example","password":"Passw0rd!123"}'
+HTTP/1.1 409 Conflict
+Content-Type: application/json; charset=utf-8
+{
+    "success": false,
+    "error": {
+        "code": "conflict",
+        "message": "A user with that email already exists",
+        "details": {
+            "email": "nina.petrov@roster.example"
+        }
+    }
+}
+```
+
+Literal request/response pairs for every endpoint, captured from the Compose
+stack, are in [`docs/api-transcript.md`](docs/api-transcript.md); the script
 that produced them is [`docs/capture-api.sh`](docs/capture-api.sh).
+
+## The console
+
+Captured with Playwright against the Compose stack seeded with fictional demo
+users.
+
+| Page 3 of 4, rows 21–30 | Editing: prefilled, no password field |
+| --- | --- |
+| ![Pagination](docs/screenshots/02-pagination.png) | ![Edit user](docs/screenshots/03-edit-user.png) |
+
+| A real 409 shown in the form, which stays open | On a phone |
+| --- | --- |
+| ![Duplicate email](docs/screenshots/04-duplicate-email-error.png) | ![Mobile list](docs/screenshots/05-mobile-list.png) |
+
+Loading, empty and error states are separate screens rather than a bare table,
+and the error state has a retry button. Deleting the last user on the final
+page moves back a page instead of showing "No users yet".
 
 ## One request, end to end
 
@@ -120,14 +170,19 @@ handles `SIGINT`/`SIGTERM`.
 
 Client: `api/httpClient.js` (one axios instance, one error-to-string mapper) →
 `api/users.js` (resource functions) → `hooks/useUsers.js` (all list state and
-mutations) → components, which are purely presentational. `App.js` is
+mutations) → components, which are purely presentational. `App.jsx` is
 composition only. After every mutation the hook re-reads the page from the
 server rather than patching local state, so the UI cannot drift from what the
 database normalised.
 
-## Environment variables
+## Configuration
 
-`api/.env`:
+The root `.env` (template: [`.env.example`](.env.example)) feeds Compose: the
+Postgres user, password and database name, `PUBLIC_API_URL` (baked into the
+client bundle), `CLIENT_URL`, `SEED_ON_BOOT` and `LOG_LEVEL`.
+
+For running the API outside Docker, `api/.env` (template:
+[`api/.env.example`](api/.env.example)):
 
 | Variable | Required | Default | Purpose |
 | --- | --- | --- | --- |
@@ -140,9 +195,9 @@ database normalised.
 | `PASSWORD_HASHER` | no | `bcrypt` | Which registered hashing strategy to resolve. |
 | `BCRYPT_ROUNDS` | no | `10` | bcrypt cost factor. The suite uses `4` for speed. |
 | `PAGE_DEFAULT_LIMIT` | no | `25` | Page size when the client does not ask for one. |
-| `PAGE_MAX_LIMIT` | no | `100` | Ceiling the service clamps every page size to. |
+| `PAGE_MAX_LIMIT` | no | `100` | Largest `?limit` accepted; anything above is a `400`. |
 | `LOG_LEVEL` | no | `info` (`silent` under `NODE_ENV=test`) | `silent`, `error`, `warn`, `info` or `debug`. `debug` also logs SQL. |
-| `SEED_ON_BOOT` | no | `false` | Insert 34 demo users after the schema syncs. Development only. |
+| `SEED_ON_BOOT` | no | `false` | Insert 34 fictional demo users after the schema syncs (PostgreSQL only). |
 
 `client/.env`: `VITE_API_URL` (default: a same-origin `/api`, useful behind
 a reverse proxy). The Vite dev server listens on `8701`.
@@ -151,39 +206,31 @@ a reverse proxy). The Vite dev server listens on `8701`.
 
 ```bash
 cd api    && npm test     # node:test + supertest against in-process pg-mem
-cd client && npm test     # Vitest + RTL, axios mocked at the adapter
+cd client && npm test     # Vitest + Testing Library, axios mocked at the adapter
 ```
 
 Neither suite needs a database, a network or Docker. Last run:
 
 ```
-$ cd api && npm test
-# tests 39
-# suites 12
-# pass 39
-# fail 0
-
-$ cd client && npm test
-Test Suites: 3 passed, 3 total
-Tests:       24 passed, 24 total
+api:    # tests 43   # pass 43   # fail 0
+client: Test Files 3 passed (3)   Tests 25 passed (25)
 ```
 
 The API suite wires `pg-mem` in as Sequelize's `dialectModule`, so tests
-exercise the same SQL production does — `LIMIT`/`OFFSET`, unique-constraint
-violations, affected-row counts — with no server and no native build. The client
+exercise the same SQL production does (`LIMIT`/`OFFSET`, unique-constraint
+violations, affected-row counts) with no server and no native build. The client
 suite mocks axios at the adapter level, so the real resource functions and error
-mapping genuinely execute and no test opens a socket.
+mapping run and no test opens a socket.
 
-`npm run lint`, `npm run format:check` and (client) `npm run build` are wired in
-both packages.
+`npm run lint` (ESLint 9) and `npm run format:check` (Prettier) are wired in
+both packages, and `npm run build` in the client.
 
 ## Defects found in the original submission
 
 Each row below is either reproduced verbatim in
 [`docs/original-behaviour.md`](docs/original-behaviour.md) — a recorded session
 of the pre-rework tree running against a throwaway database — or pinned by a
-named test in this repository. The history of this repository was rebuilt, so
-those two documents, not the commit log, are the evidence.
+named test in this repository.
 
 | Defect | Effect | Pinned by |
 | --- | --- | --- |
@@ -203,8 +250,8 @@ those two documents, not the commit log, are the evidence.
 
 ## Decisions worth explaining
 
-**Errors are data, not control flow.** Services throw `AppError`; one middleware
-turns it into `{ success: false, error: { code, message, details } }`.
+**Errors are data, not control flow.** Services throw `AppError`, Express 5
+forwards any rejected handler promise, and one middleware turns the result into `{ success: false, error: { code, message, details } }`.
 Sequelize's `UniqueConstraintError`, body-parser's `entity.parse.failed` and
 `entity.too.large` are normalised in that same function. That is why "not found"
 is a 404 from every endpoint rather than a 404 here and a 500 there.
@@ -212,17 +259,16 @@ is a 404 from every endpoint rather than a 404 here and a 500 there.
 **Validation sits at the edge and coerces.** Zod schemas parse *and* transform,
 so `req.params.id` reaches the service as a number and `email` reaches it
 trimmed and lower-cased. Handlers below never re-check shapes. bcrypt's 72-byte
-input limit is encoded as a schema rule rather than discovered as silent
-truncation.
+input limit is encoded as a schema rule, counted in UTF-8 bytes rather than
+characters, instead of being discovered as silent truncation.
 
 **The list was the only real bottleneck.** A single-table CRUD service does not
 need a cache or a queue, and none was added. What it did need: `findAndCountAll`
 with a `{ page, limit, total, totalPages }` envelope, a pager in the UI, and a
-size ceiling a client cannot argue past — `?limit=100000` is a `400`, asserted
-in `api/tests/user.api.test.js` (*caps limit at PAGE_MAX_LIMIT so a client
-cannot ask for everything*). `email` gained a unique index that the pre-insert
-uniqueness check also uses, so that lookup is an index probe rather than a
-sequential scan. `express.json({ limit: "100kb" })` bounds the other direction.
+size ceiling a client cannot argue past — anything above `PAGE_MAX_LIMIT` is a
+`400`, and the Zod schema and the service read that same setting. `email`
+gained a unique index that the pre-insert uniqueness check also uses, so that
+lookup is an index probe rather than a sequential scan. `express.json({ limit: "100kb" })` bounds the other direction.
 
 **Password hashing is the one extension seam.** `lib/password/` is a registry of
 `{ name, hash, verify }` factories selected by `PASSWORD_HASHER`. bcrypt is the
@@ -238,24 +284,26 @@ Vite, so Vitest reuses that same config and JSX transform for its tests.
 ## Known gaps
 
 - **No authentication or authorisation at all.** Every endpoint is open. The
-  `password` column is correctly hashed but nothing ever signs in — no session,
-  no token, no login route. Adding it would have meant inventing a brief.
-- **The page-size ceiling is enforced in two places that can disagree.** The Zod
-  schema rejects `limit > 100` outright with a `400`, but that `100` is a
-  literal; the service separately clamps to `PAGE_MAX_LIMIT`. Set
-  `PAGE_MAX_LIMIT=50` and `?limit=80` is accepted by validation and then
-  silently clamped. Only the hardcoded bound produces the 400.
+  `password` column is correctly hashed but nothing ever signs in: no session,
+  no token, no login route. Adding it would have meant inventing a brief. Seeded
+  demo users get a random password for the same reason.
 - **`sequelize.sync()` is not a migration strategy.** It creates missing tables
   and will not safely alter or drop existing ones. `DB_AUTO_SYNC=false` is the
   off switch; real `sequelize-cli` migrations were out of scope.
 - **`pg-mem` is not PostgreSQL.** It models this application's SQL faithfully
-  and enforces the unique constraint under test, but a suite that grew into
-  CTEs, window functions or extensions would need a real database in CI.
-- **The Docker images are unbuilt.** See the note under "Run it".
+  and enforces the unique constraint under test, but it cannot run the
+  `findOrCreate` the seeder uses, so seeding needs real PostgreSQL. A suite that
+  grew into CTEs, window functions or extensions would need a real database.
 - **No rate limiting, no request id, no structured logs.** `lib/logger.js` is a
-  level-aware `console` wrapper — fine for an assessment, wrong for production.
+  level-aware `console` wrapper; fine at this size, wrong for production.
 - **bcrypt is synchronous CPU work on the event loop.** Irrelevant at this
   scale; under real signup load it wants a worker thread or a queue.
 - **Deletes are hard deletes.** No soft delete, no audit trail.
+- **Fonts load from Google Fonts.** Offline, the console falls back to system
+  fonts.
 - **The client has one screen, no router and no global state library.** Adding
   either would be weight without a reason.
+
+## License
+
+MIT; see [LICENSE](LICENSE).
