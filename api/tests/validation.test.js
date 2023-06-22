@@ -28,6 +28,14 @@ describe("createUserSchema", () => {
     assert.equal(parsed.email, "amelia@fitco.example");
   });
 
+  it("names the missing field in the error", () => {
+    const { password: _omitted, ...withoutPassword } = base;
+    const result = createUserSchema.safeParse(withoutPassword);
+
+    assert.equal(result.success, false);
+    assert.equal(result.error.issues[0].message, "password is required");
+  });
+
   it("rejects whitespace-only names", () => {
     assert.equal(
       createUserSchema.safeParse({ ...base, firstName: "   " }).success,

@@ -2,22 +2,27 @@ import { z } from "zod";
 
 import { config } from "../config/env.js";
 
+const requiredString = (label) =>
+  z.string({
+    error: (issue) =>
+      issue.input === undefined
+        ? `${label} is required`
+        : `${label} must be a string`,
+  });
+
 const name = (label) =>
-  z
-    .string({ required_error: `${label} is required` })
+  requiredString(label)
     .trim()
     .min(1, `${label} must not be empty`)
     .max(80, `${label} must be at most 80 characters`);
 
-const email = z
-  .string({ required_error: "email is required" })
+const email = requiredString("email")
   .trim()
   .toLowerCase()
   .email("email must be a valid email address")
   .max(254);
 
-const password = z
-  .string({ required_error: "password is required" })
+const password = requiredString("password")
   .min(8, "password must be at least 8 characters")
   .max(72, "password must be at most 72 characters");
 
