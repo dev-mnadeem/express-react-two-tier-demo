@@ -16,12 +16,12 @@ Node 20.11+ and a PostgreSQL instance.
 ```bash
 cd api
 npm install
-cp .env.sample .env          # set DB_URL; SEED_ON_BOOT=true gives you 34 demo rows
+cp .env.example .env          # set DB_URL; SEED_ON_BOOT=true gives you 34 demo rows
 npm start                    # http://localhost:8700
 
 cd ../client                 # second terminal
 npm install
-cp .env.sample .env          # VITE_API_URL=http://localhost:8700
+cp .env.example .env          # VITE_API_URL=http://localhost:8700
 npm run dev                  # http://localhost:8701
 ```
 

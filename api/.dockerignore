@@ -4,7 +4,7 @@ coverage
 tests
 .env
 .env.*
-!.env.sample
+!.env.example
 eslint.config.js
 .prettierrc.json
 .prettierignore

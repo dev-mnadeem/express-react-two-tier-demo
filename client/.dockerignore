@@ -5,7 +5,7 @@ coverage
 npm-debug.log*
 .env
 .env.*
-!.env.sample
+!.env.example
 src/__tests__
 src/setupTests.js
 Dockerfile

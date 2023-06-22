@@ -7,7 +7,7 @@ diagram and the full quickstart. In short:
 
 ```bash
 npm install
-cp .env.sample .env     # point VITE_API_URL at the API
+cp .env.example .env     # point VITE_API_URL at the API
 npm run dev             # http://localhost:8701
 npm test                # Vitest + React Testing Library, network fully mocked
 npm run lint

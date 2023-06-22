@@ -12,7 +12,7 @@ const dialect = process.env.DB_DIALECT ?? "postgres";
 
 if (dialect === "postgres" && !process.env.DB_URL) {
   throw new Error(
-    "DB_URL is required when DB_DIALECT is 'postgres'. Copy .env.sample to .env and fill it in."
+    "DB_URL is required when DB_DIALECT is 'postgres'. Copy .env.example to .env and fill it in."
   );
 }
 
