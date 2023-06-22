@@ -14,7 +14,9 @@ const formatIssues = (error) =>
 export const validate =
   (schema, source = "body") =>
   (req, _res, next) => {
-    const result = schema.safeParse(req[source]);
+    // Express 5 leaves req.body undefined when nothing was parsed; validate it
+    // as an empty object so the client gets per-field messages, not a type error.
+    const result = schema.safeParse(req[source] ?? {});
 
     if (!result.success) {
       return next(

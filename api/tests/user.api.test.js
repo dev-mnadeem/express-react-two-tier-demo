@@ -232,6 +232,17 @@ describe("PUT /api/users/:id", () => {
     await request(app).put(`/api/users/${user.id}`).send({}).expect(400);
   });
 
+  it("explains a request with no body at all", async () => {
+    const user = await makeUser();
+
+    const res = await request(app).put(`/api/users/${user.id}`).expect(400);
+
+    assert.equal(
+      res.body.error.details[0].message,
+      "At least one field must be provided"
+    );
+  });
+
   it("rejects an email already taken by another user with 409", async () => {
     const [first, second] = await makeUsers(2);
 
