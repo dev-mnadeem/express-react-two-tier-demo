@@ -49,6 +49,18 @@ describe("createUserSchema", () => {
       false
     );
   });
+
+  it("measures the bcrypt limit in bytes, not characters", () => {
+    // 40 two-byte characters: 40 characters long, 80 bytes on the wire.
+    assert.equal(
+      createUserSchema.safeParse({ ...base, password: "é".repeat(40) }).success,
+      false
+    );
+    assert.equal(
+      createUserSchema.safeParse({ ...base, password: "é".repeat(36) }).success,
+      true
+    );
+  });
 });
 
 describe("updateUserSchema", () => {

@@ -22,9 +22,16 @@ const email = requiredString("email")
   .email("email must be a valid email address")
   .max(254);
 
+// bcrypt silently ignores everything past 72 *bytes*, so a character count
+// let a 40-character accented password through with its tail never hashed.
+const BCRYPT_MAX_BYTES = 72;
+
 const password = requiredString("password")
   .min(8, "password must be at least 8 characters")
-  .max(72, "password must be at most 72 characters");
+  .refine(
+    (value) => Buffer.byteLength(value, "utf8") <= BCRYPT_MAX_BYTES,
+    `password must be at most ${BCRYPT_MAX_BYTES} bytes`
+  );
 
 export const idParamSchema = z.object({
   id: z.coerce.number().int().positive("id must be a positive integer"),
