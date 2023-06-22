@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  buildListUsersQuerySchema,
   createUserSchema,
   idParamSchema,
   listUsersQuerySchema,
@@ -84,5 +85,12 @@ describe("listUsersQuerySchema", () => {
       listUsersQuerySchema.safeParse({ limit: "101" }).success,
       false
     );
+  });
+
+  it("takes its ceiling from the configured maximum", () => {
+    const schema = buildListUsersQuerySchema(50);
+
+    assert.equal(schema.safeParse({ limit: "50" }).success, true);
+    assert.equal(schema.safeParse({ limit: "80" }).success, false);
   });
 });

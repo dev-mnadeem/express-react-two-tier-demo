@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { config } from "../config/env.js";
+
 const name = (label) =>
   z
     .string({ required_error: `${label} is required` })
@@ -23,10 +25,25 @@ export const idParamSchema = z.object({
   id: z.coerce.number().int().positive("id must be a positive integer"),
 });
 
-export const listUsersQuerySchema = z.object({
-  page: z.coerce.number().int().positive().default(1),
-  limit: z.coerce.number().int().positive().max(100).optional(),
-});
+/**
+ * The ceiling comes from PAGE_MAX_LIMIT so validation and the service agree;
+ * a hardcoded 100 here used to let `?limit=80` through and then silently clamp
+ * it whenever PAGE_MAX_LIMIT was set lower.
+ */
+export const buildListUsersQuerySchema = (maxLimit) =>
+  z.object({
+    page: z.coerce.number().int().positive().default(1),
+    limit: z.coerce
+      .number()
+      .int()
+      .positive()
+      .max(maxLimit, `limit must be at most ${maxLimit}`)
+      .optional(),
+  });
+
+export const listUsersQuerySchema = buildListUsersQuerySchema(
+  config.pagination.maxLimit
+);
 
 export const createUserSchema = z.object({
   firstName: name("firstName"),
