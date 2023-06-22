@@ -46,38 +46,40 @@ function App() {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <Container className="d-flex align-items-center justify-content-between py-3">
+        <Container className="d-flex align-items-center justify-content-between gap-3 py-3">
           <div className="d-flex align-items-center gap-2">
             <span className="brand-mark" aria-hidden="true">
               R
             </span>
-            <span className="fw-semibold">Roster</span>
+            <span className="brand-name">Roster</span>
           </div>
 
-          <span className="small text-muted">User management</span>
+          <span className="tagline d-none d-sm-inline">User directory</span>
         </Container>
       </header>
 
-      <Container as="main" className="py-4">
-        <div className="d-flex flex-wrap gap-3 justify-content-between align-items-center mb-3">
+      <Container as="main" className="py-4 py-md-5">
+        <div className="d-flex flex-column flex-sm-row gap-3 justify-content-between align-items-sm-end mb-4">
           <div>
-            <h1 className="h4 mb-1">Users</h1>
-            <p className="text-muted small mb-0">
+            <h1 className="page-title">Users</h1>
+            <p className="text-muted mb-0" aria-live="polite">
               {status === "ready"
                 ? `${pagination.total} registered ${
                     pagination.total === 1 ? "user" : "users"
                   }`
-                : " "}
+                : "\u00a0"}
             </p>
           </div>
 
-          <Button onClick={openCreate}>
-            <i className="bi bi-plus-lg me-2" aria-hidden="true" />
-            Add user
-          </Button>
+          <div className="header-actions">
+            <Button onClick={openCreate}>
+              <i className="bi bi-plus-lg me-2" aria-hidden="true" />
+              Add user
+            </Button>
+          </div>
         </div>
 
-        <div className="card shadow-sm border-0 overflow-hidden">
+        <section className="panel" aria-label="User list">
           {hasUsers ? (
             <>
               <UserTable
@@ -95,7 +97,7 @@ function App() {
               onAdd={openCreate}
             />
           )}
-        </div>
+        </section>
       </Container>
 
       <UserFormModal

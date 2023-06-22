@@ -9,7 +9,7 @@ export const StatusPanel = ({ status, error, onRetry, onAdd }) => {
   if (status === "loading") {
     return (
       <div className="status-panel" role="status" aria-live="polite">
-        <Spinner animation="border" variant="primary" />
+        <Spinner animation="border" variant="primary" aria-hidden="true" />
         <p className="mt-3 mb-0 text-muted">Loading users&hellip;</p>
       </div>
     );
@@ -18,7 +18,10 @@ export const StatusPanel = ({ status, error, onRetry, onAdd }) => {
   if (status === "error") {
     return (
       <div className="status-panel" role="alert">
-        <i className="bi bi-exclamation-triangle status-icon text-danger" />
+        <i
+          className="bi bi-exclamation-triangle status-icon text-danger"
+          aria-hidden="true"
+        />
         <h2 className="h6 mt-3 mb-1">Could not load users</h2>
         <p className="text-muted small mb-3">{error}</p>
         <Button variant="outline-primary" size="sm" onClick={onRetry}>
@@ -30,7 +33,10 @@ export const StatusPanel = ({ status, error, onRetry, onAdd }) => {
 
   return (
     <div className="status-panel">
-      <i className="bi bi-people status-icon text-secondary" />
+      <i
+        className="bi bi-people status-icon text-secondary"
+        aria-hidden="true"
+      />
       <h2 className="h6 mt-3 mb-1">No users yet</h2>
       <p className="text-muted small mb-3">
         Add the first user to get started.

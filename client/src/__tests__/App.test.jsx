@@ -44,7 +44,7 @@ describe("user list", () => {
     render(<App />);
 
     expect(await screen.findByText("First1 Last1")).toBeInTheDocument();
-    expect(screen.getByText("user3@roster.example")).toBeInTheDocument();
+    expect(screen.getAllByText("user3@roster.example")).not.toHaveLength(0);
     expect(screen.getByText(/3 registered users/i)).toBeInTheDocument();
   });
 

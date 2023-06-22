@@ -14,7 +14,10 @@ export const Pager = ({ pagination, onChange }) => {
   const last = Math.min(page * limit, total);
 
   return (
-    <div className="d-flex justify-content-between align-items-center px-3 py-2 border-top">
+    <nav
+      className="pager d-flex flex-wrap gap-2 justify-content-between align-items-center px-3 py-2"
+      aria-label="User list pages"
+    >
       <span className="small text-muted">
         Showing <strong>{first}</strong>&ndash;<strong>{last}</strong> of{" "}
         <strong>{total}</strong> users
@@ -43,6 +46,6 @@ export const Pager = ({ pagination, onChange }) => {
           Next
         </Button>
       </div>
-    </div>
+    </nav>
   );
 };
