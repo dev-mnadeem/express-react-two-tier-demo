@@ -26,8 +26,8 @@ export const validate =
     }
 
     if (source === "query") {
-      // Express 4 exposes req.query via a getter on some versions; assigning to a
-      // dedicated field keeps this portable.
+      // Express 5 exposes req.query through a getter, so the parsed query
+      // cannot be written back and goes on its own field instead.
       req.validatedQuery = result.data;
     } else {
       req[source] = result.data;
