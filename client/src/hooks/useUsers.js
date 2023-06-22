@@ -24,9 +24,18 @@ export const useUsers = ({ pageSize = 10 } = {}) => {
 
     try {
       const result = await usersApi.listUsers({ page, limit: pageSize });
+      const nextPagination = result.pagination ?? EMPTY_PAGINATION;
+
+      // Deleting the only row on the last page leaves this page empty while
+      // earlier pages still hold users; step back instead of showing the
+      // "No users yet" state.
+      if (page > nextPagination.totalPages && nextPagination.total > 0) {
+        setPage(nextPagination.totalPages);
+        return;
+      }
 
       setUsers(result.users ?? []);
-      setPagination(result.pagination ?? EMPTY_PAGINATION);
+      setPagination(nextPagination);
       setStatus("ready");
     } catch (caught) {
       setError(toErrorMessage(caught));

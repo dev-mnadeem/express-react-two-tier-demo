@@ -326,6 +326,45 @@ describe("deleting a user", () => {
     await waitFor(() => expect(deleted).toBe(1));
   });
 
+  it("steps back a page when the last row of the final page is deleted", async () => {
+    let total = 11;
+    mock.onGet("/users").reply((config) => {
+      const { page } = config.params;
+      const onPage = Math.max(0, Math.min(10, total - (page - 1) * 10));
+
+      return [
+        200,
+        pageReply(makeUsers(onPage, (page - 1) * 10), {
+          page,
+          limit: 10,
+          total,
+        }),
+      ];
+    });
+    mock.onDelete("/users/11").reply(() => {
+      total -= 1;
+
+      return [204];
+    });
+
+    render(<App />);
+    await screen.findByText("First1 Last1");
+    await userEvent.click(screen.getByRole("button", { name: /next/i }));
+    await screen.findByText("First11 Last11");
+
+    await userEvent.click(
+      screen.getByRole("button", { name: /delete first11 last11/i })
+    );
+    const dialog = await screen.findByRole("dialog");
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: /delete user/i })
+    );
+
+    expect(await screen.findByText("First10 Last10")).toBeInTheDocument();
+    expect(screen.queryByText(/no users yet/i)).not.toBeInTheDocument();
+    expect(screen.getByText(/page 1 of 1/i)).toBeInTheDocument();
+  });
+
   it("reports a failed delete instead of silently doing nothing", async () => {
     mock.onGet("/users").reply(200, pageReply(makeUsers(1)));
     mock.onDelete("/users/1").reply(404, {
