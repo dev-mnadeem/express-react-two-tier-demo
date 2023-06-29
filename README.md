@@ -259,3 +259,7 @@ runner wants neither. The client stays on Jest because CRA owns that config.
 - **Deletes are hard deletes.** No soft delete, no audit trail.
 - **The client has one screen, no router and no global state library.** Adding
   either would be weight without a reason.
+
+## Author
+
+[**Muhammad Nadeem**](https://github.com/dev-mnadeem)
